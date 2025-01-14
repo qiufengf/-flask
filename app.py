@@ -1,26 +1,34 @@
-from flask import url_for, Flask,render_template
-from markupsafe import escape
+from flask import Flask, render_template
+from flask_sqlalchemy import SQLAlchemy
 
-
-# 准备虚拟数据
-name = 'Grey Li'
-movies = [
-    {'title': 'My Neighbor Totoro', 'year': '1988'},
-    {'title': 'Dead Poets Society', 'year': '1989'},
-    {'title': 'A Perfect World', 'year': '1993'},
-    {'title': 'Leon', 'year': '1994'},
-    {'title': 'Mahjong', 'year': '1996'},
-    {'title': 'Swallowtail Butterfly', 'year': '1996'},
-    {'title': 'King of Comedy', 'year': '1999'},
-    {'title': 'Devils on the Doorstep', 'year': '1999'},
-    {'title': 'WALL-E', 'year': '2008'},
-    {'title': 'The Pork of Music', 'year': '2012'},
-]
+# 配置数据库
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:123@127.0.0.1:3306/first'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # 禁用修改追踪
+
+# 初始化数据库
+db = SQLAlchemy(app)
+
+# 定义模型类，手动指定表名
+class User(db.Model):
+    __tablename__ = 'users'  # 手动指定表名
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20))  # 用户名
+
+class Movie(db.Model):
+    __tablename__ = 'movies'  # 手动指定表名
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(20))  # 电影标题
+    year = db.Column(db.String(4))  # 电影年份
 
 @app.route('/')
 def index():
-    return render_template('index.html',name=name,movies=movies)
+    user = User.query.first()
+    movies = Movie.query.all()
+    return render_template('index.html',user=user,movies=movies)
 
+
+
+# 启动应用
 if __name__ == '__main__':
     app.run(debug=True)
