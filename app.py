@@ -25,10 +25,21 @@ class Movie(db.Model):
 def index():
     user = User.query.first()
     movies = Movie.query.all()
-    return render_template('index.html',user=user,movies=movies)
+    return render_template('index.html',movies=movies)
+
+@app.context_processor
+def inject_user():
+    user = User.query.first()
+    print(user)
+    return dict(user=user)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'),404
 
 
 
 # 启动应用
 if __name__ == '__main__':
+
     app.run(debug=True)
