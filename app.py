@@ -15,8 +15,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 login_manger = LoginManager(app)
 login_manger.login_view = 'login'
+
+
 #创建管理员账户
-@app.cli.command()
+@app.cli.command()    #这是flask一个装饰器，将函数注册为一个CLI命令，当运行flask admin ，flask会调研该函数
 @click.option('--username', prompt=True, help='The username used to login.')
 @click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True, help='The password used to login.')
 def admin(username, password):
@@ -25,7 +27,7 @@ def admin(username, password):
 
     user = User.query.first()
     if user is not None:
-        click.echo('Updating user...')
+        click.echo('Updating user...')   #click.echo()是Click提供的函数，用于打印信息到心里话
         user.username = username
         user.set_password(password)  # 设置密码
     else:
@@ -96,7 +98,7 @@ class Movie(db.Model):
     year = db.Column(db.String(4))
 
 
-@login_manger.user_loader
+@login_manger.user_loader   #这个装饰器告诉flask-login，当需要加载用户时，应该调用那个函数
 def load_user(user_id):  #创建用户加载回调函数，接受用户ID作为参数
     user = User.query.get(int(user_id))  #用ID作为User模型的主键查询对应的用户
     return user #返回用户对象
@@ -127,7 +129,7 @@ def login():
 
 #视图保护
 @app.route('/movie/delete/<int:movie_id>',methods=['POST'])
-@login_required #登陆保护
+@login_required #登陆保护，确保只有登陆的用户才能访问该视图，如果用户未登录，Flask-login会自动重定向到登陆页面
 def delete(movie_id):
     movie = Movie.query.get_or_404(movie_id)
     db.session.delete(movie)
@@ -140,7 +142,7 @@ def delete(movie_id):
 
 #登出操作
 @app.route('/logout')
-@login_required #用于视图保护，后面会详细介绍
+@login_required #用于视图保护，后面会详细介绍 ，重定向到主页
 def logout():
     logout_user()
     flash('再见')
